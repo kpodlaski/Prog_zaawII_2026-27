@@ -27,3 +27,23 @@ test_loader = torch.utils.data.DataLoader(
                              ])),
     batch_size=batch_size_test, shuffle=True)
 
+
+for x,y in train_loader:
+    print(x.shape, y.shape)
+    for i in range (1):
+        print(x[i])
+        print(y[i])
+        plt.imshow(x[i][0], cmap='gray')
+        #plt.show()
+        plt.savefig(f'{base_path}/data/out/mnist_{y[i]}.png')
+    break
+
+
+
+
+
+
+
+
+
+
