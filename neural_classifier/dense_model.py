@@ -17,7 +17,7 @@ class DenseNet(nn.Module):
         x = torch.tanh(self.l1(x))
         x = torch.sigmoid(self.l2(x))
         x = torch.relu(self.l3(x))
-        x = torch.sigmoid(self.output(x))
+        x = torch.log_softmax(x, dim=1)
         return x
 
     def summary(self, size):

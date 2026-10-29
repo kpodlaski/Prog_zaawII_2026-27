@@ -73,12 +73,12 @@ class ML_Wrapper():
             return cf_matrix
 
     def save_model(self, fname):
-        torch.save(self.network.state_dict(), self.base_path + '/out/{}_model.pth'.format(fname))
+        torch.save(self.network.state_dict(), self.base_path + '/data/out/{}_model.pth'.format(fname))
         #torch.save(optimizer.state_dict(), base_path+'/results/optimizer.pth')
 
     @staticmethod
     def load_model(base_path, file_name, model, optimizer=None, device = None ):
-        file_path = base_path+"/out/"+file_name
+        file_path = base_path+"/data/out/"+file_name
         model.load_state_dict(torch.load(file_path))
         return ML_Wrapper(model, optimizer,base_path,device)
 
@@ -91,7 +91,7 @@ class ML_Wrapper():
         plt.legend(['Train Loss', 'Test Loss'], loc='upper right')
         plt.xlabel('epoch')
         plt.ylabel('negative log likelihood loss')
-        plt.savefig(self.base_path + '/out/training_plot.png')
+        plt.savefig(self.base_path + '/data/out/training_plot.png')
         #fig.show()
 
     def summary(self, size):

@@ -11,8 +11,8 @@ print(torch.cuda.device_count(), torch.cuda.current_device(), torch.cuda.get_dev
 data_loader_kwargs ={'pin_memory': True}
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
-base_path = "../../../"
-n_epochs = 3
+base_path = "../"
+n_epochs = 15
 batch_size_train = 64
 batch_size_test = 1000
 learning_rate = 0.01
@@ -41,6 +41,7 @@ network = DenseNet()
 optimizer = optim.SGD(network.parameters(), lr=learning_rate,
                       momentum=momentum)
 ml = ML_Wrapper(network, optimizer, base_path, device)
+ml.summary((1,1,28,28))
 
 print("Start training")
 for epoch in range(1, n_epochs + 1):
@@ -48,9 +49,14 @@ for epoch in range(1, n_epochs + 1):
 ml.save_model("dense_network")
 
 print("Test on training set:")
-ml.test(train_loader)
+cm = ml.test(train_loader, create_confusion=True)
+print("Train Confusion Mattrix")
+print(cm)
 print("Test on test set:")
-ml.test(test_loader)
+cm = ml.test(test_loader, create_confusion=True)
+print("Test Confusion Mattrix")
+print(cm)
+
 
 ml.training_plot()
 
@@ -74,5 +80,5 @@ for i in range(6):
           output.data.max(1, keepdim=True)[1][i].item()))
       plt.xticks([])
       plt.yticks([])
-plt.savefig(base_path+"/out/dense_network_examples.png")
+plt.savefig(base_path+"/data/out/dense_network_examples.png")
 #fig.show()
