@@ -4,6 +4,7 @@ import torchvision
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
+from neural_classifier.cnn_model import CNNNet
 from neural_classifier.dense_model import DenseNet
 from neural_classifier.ml_wrapper import ML_Wrapper
 
@@ -38,10 +39,11 @@ test_loader = torch.utils.data.DataLoader(
     batch_size=batch_size_test, shuffle=True, **data_loader_kwargs)
 
 network = DenseNet()
+#network = CNNNet()
 optimizer = optim.SGD(network.parameters(), lr=learning_rate,
                       momentum=momentum)
 ml = ML_Wrapper(network, optimizer, base_path, device)
-ml.summary((1,1,28,28))
+ml.summary((1,28,28))
 
 print("Start training")
 for epoch in range(1, n_epochs + 1):
