@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class CNNNet(nn.Module):
     def __init__(self):
-        super(MnistCNN, self).__init__()
+        super(CNNNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
         self.max1 =  nn.MaxPool2d((2, 2), stride=(2, 2))
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
