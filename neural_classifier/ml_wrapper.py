@@ -8,6 +8,7 @@ from torchsummary import summary
 import numpy as np
 
 
+
 class ML_Wrapper():
     def __init__(self, network, optimizer, base_path, device):
         self.network=network
@@ -17,6 +18,7 @@ class ML_Wrapper():
         self.base_path = base_path
         self.train_losses = []
         self.val_losses = []
+        self.activations = {}
 
     def train(self, epoch, data_loader, val_loader = None):
         t0 = time.time()
@@ -97,3 +99,15 @@ class ML_Wrapper():
     def summary(self, size):
         x = torch.Tensor(size).to(self.device)
         summary(self.network, size)
+
+
+    def register_hook(self, name, layer):
+        layer.register_forward_hook(self.get_activation(name))
+
+    def get_activation(self, name):
+        def hook(model, input, output):
+            # Detach from the computational graph and move to CPU
+            self.activations[name] = output.detach().cpu()
+
+        return hook
+
