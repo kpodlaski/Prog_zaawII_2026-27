@@ -24,9 +24,10 @@ log_interval = 10
 train_loader = torch.utils.data.DataLoader(
     torchvision.datasets.EMNIST(base_path+'/datasets/', train=True, download=True,
         split='letters', #ma 26 klas może być 'balanced' ale ma 47 klas,
-        target_transform=lambda y: y - 1,
+        target_transform=lambda y: y - 1, # zamiast 1-27 na 0-26
         transform=torchvision.transforms.Compose([
             torchvision.transforms.ToTensor(),
+            torchvision.transforms.Lambda(lambda x: torch.transpose(x, 1, 2)),
             torchvision.transforms.Normalize((0.1751,), (0.3332,)) # Nowa normalizacja
         ])
     ),
@@ -38,6 +39,7 @@ test_loader = torch.utils.data.DataLoader(
         target_transform=lambda y: y - 1,
         transform=torchvision.transforms.Compose([
             torchvision.transforms.ToTensor(),
+            torchvision.transforms.Lambda(lambda x: torch.transpose(x, 1, 2)),
             torchvision.transforms.Normalize((0.1751,), (0.3332,)) # Nowa normalizacja
         ])
     ),
@@ -66,8 +68,55 @@ for layer in layers_to_freeze:
 ml.optimizer = optim.SGD(ml.network.parameters(), lr=learning_rate,
                       momentum=momentum)
 print("Nowa sieć po zamrożeniu warstw")
-ml.summary((1,28,28))
 ml.network.to(device)
+ml.summary((1,28,28))
+
 
 for epoch in range(1, n_epochs + 1):
     ml.train(epoch, train_loader, test_loader)
+
+ml.save_model("cnn_eminst_network")
+
+print("Test on training set:")
+cm = ml.test(train_loader, create_confusion=True)
+print("Train Confusion Mattrix")
+print(cm)
+print("Test on test set:")
+cm = ml.test(test_loader, create_confusion=True)
+print("Test Confusion Mattrix")
+print(cm)
+
+
+ml.training_plot()
+
+
+print("Sample results:")
+found_results = 0
+#examples = enumerate(test_loader)
+fig = plt.figure()
+for example_data, example_targets in test_loader :
+    if found_results>=6:
+        break
+    with torch.no_grad():
+      example_data =example_data.to(device)
+      network.to(device)
+      output = ml.network(example_data)
+
+    example_data =example_data.cpu()
+    for e in range(len(example_data)) :
+        if found_results>=6:
+            break
+        pred = output.data.max(1, keepdim=True)[1][e].item()
+        label = example_targets[e].item()
+        if pred != label:
+            i = found_results
+            found_results += 1
+            plt.subplot(2, 3, i + 1)
+            plt.tight_layout()
+            plt.imshow(example_data[e][0], cmap='gray', interpolation='none')
+            plt.title("Prediction: {}".format(
+              train_loader.dataset.classes[ 1+ output.data.max(1, keepdim=True)[1][e].item()]))
+            plt.xticks([])
+            plt.yticks([])
+plt.savefig(base_path+"/data/out/cnn_emnist_network_bad_examples.png")
+#fig.show()
