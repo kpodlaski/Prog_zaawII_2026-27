@@ -22,7 +22,7 @@ learning_rate = 0.01
 momentum = 0.5
 log_interval = 10
 
-test_loader = torch.utils.data.DataLoader(
+mnist_test_loader = torch.utils.data.DataLoader(
     torchvision.datasets.MNIST(base_path+'/datasets/', train=False, download=True,
                              transform=torchvision.transforms.Compose([
                                torchvision.transforms.ToTensor(),
@@ -31,6 +31,18 @@ test_loader = torch.utils.data.DataLoader(
                              ])),
     batch_size=batch_size_test, shuffle=True, **data_loader_kwargs)
 
+emnist_test_loader = torch.utils.data.DataLoader(
+    torchvision.datasets.EMNIST(base_path+'/datasets/', train=False, download=True,
+        split='letters', #ma 26 klas może być 'balanced' ale ma 47 klas,
+        target_transform=lambda y: y - 1,
+        transform=torchvision.transforms.Compose([
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize((0.1751,), (0.3332,)) # Nowa normalizacja
+        ])
+    ),
+    batch_size=batch_size_test, shuffle=True, **data_loader_kwargs )
+test_loader = mnist_test_loader
+#test_loader = emnist_test_loader
 network = CNNNet()
 optimizer = optim.SGD(network.parameters(), lr=learning_rate,
                       momentum=momentum)
@@ -44,6 +56,7 @@ else:
     print("There is no network to load")
 
 ml.register_hook('conv1', ml.network.conv1)
+ml.register_hook('max2', ml.network.max1)
 
 #get first batch from test set
 imgs, labels = next(iter(test_loader))
@@ -52,16 +65,17 @@ print(imgs.shape)
 predict = ml.network(imgs)
 result = predict.data.max(1, keepdim=True)[1][0].item()
 
-conv1_img = ml.activations['conv1'][0].numpy()
+activation_img = ml.activations['conv1'][0].numpy()
 img = imgs[0].detach().cpu().numpy()
 
-print(conv1_img.shape)
+print(activation_img.shape)
 fig = plt.figure()
 plt.subplot(4, 4, 1)
 plt.tight_layout()
 
-print(result)
+
 pred_data = predict.data[0].detach().cpu().numpy()
+print("winning class:",result, "winning value:",np.exp(pred_data)[result])
 print("final answer vector", pred_data)
 print("final probabilities", np.exp(pred_data))
 plt.imshow(img[0], cmap='gray', interpolation='none')
@@ -71,7 +85,7 @@ plt.yticks([])
 for i in range(10):
       plt.subplot(4, 4, i + 5)
       plt.tight_layout()
-      plt.imshow(conv1_img[i], cmap='gray', interpolation='none')
+      plt.imshow(activation_img[i], cmap='gray', interpolation='none')
       plt.title(f"Act {i}")
       plt.xticks([])
       plt.yticks([])

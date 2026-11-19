@@ -102,7 +102,8 @@ class ML_Wrapper():
 
 
     def register_hook(self, name, layer):
-        layer.register_forward_hook(self.get_activation(name))
+        layer.register_forward_hook(
+            self.get_activation(name))
 
     def get_activation(self, name):
         def hook(model, input, output):
