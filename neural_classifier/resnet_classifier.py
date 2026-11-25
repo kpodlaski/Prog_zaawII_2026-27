@@ -6,7 +6,7 @@ import os
 
 
 # Place where model will be saved
-os.environ["TORCH_HOME"] = "/opt/project/in"
+os.environ["TORCH_HOME"] = "/opt/project/data/in"
 network = "ResNet50"
 #network = "VGG16"
 #network = "VT"
@@ -29,7 +29,7 @@ model.eval()
 preprocess = weights.transforms()
 print(preprocess)
 
-img = Image.open("../in/jez.jpg")
+img = Image.open("../data/in/daniel.jpeg")
 batch = preprocess(img).unsqueeze(0)
 
 
